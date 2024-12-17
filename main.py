@@ -10,7 +10,7 @@ ARROW_RIGHT_KEY = 1073741903
 
 
 pygame.init()
-WINDOW_SIZE = pygame.display.Info().current_w, pygame.display.Info().current_h
+WINDOW_SIZE = pygame.display.Info().current_w, 500  # pygame.display.Info().current_h
 surface = pygame.display.set_mode(WINDOW_SIZE)
 airplane = Airplane([WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2], [0, 0], 300, 500, 300)
 background_color = 100, 130, 200
@@ -52,12 +52,7 @@ while True:
                 holding_left = False
     surface.fill(background_color)
 
-    dtime = clock.tick()
-    airplane.update_pos([holding_right-holding_left, holding_up-holding_down], dtime)
-    forward = holding_right if airplane.flipped else holding_left
-    backwards = holding_left if airplane.flipped else holding_right
-    tilt = backwards - forward
-    if not tilt:
-        tilt = holding_up - holding_down
-    airplane.draw(surface, tilt)
+    dtime = clock.tick()/1000
+    airplane.update_pos(holding_up, holding_down, holding_left, holding_right, dtime)
+    airplane.draw(surface, dtime)
     pygame.display.update()
