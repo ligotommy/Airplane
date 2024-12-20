@@ -8,12 +8,26 @@ ARROW_LEFT_KEY = 1073741904
 ARROW_DOWN_KEY = 1073741905
 ARROW_RIGHT_KEY = 1073741903
 
+ASPECT_RATIO = 20/10
+
 
 pygame.init()
-WINDOW_SIZE = pygame.display.Info().current_w, 500  # pygame.display.Info().current_h
-surface = pygame.display.set_mode(WINDOW_SIZE)
-airplane = Airplane([WINDOW_SIZE[0]/2, WINDOW_SIZE[1]/2], [0, 0], 1000, 1000, 300)
-joystick = Joystick(pygame.Vector2(100, surface.get_height()-100), 50, 20)
+WINDOW_SIZE = pygame.display.Info().current_w, pygame.display.Info().current_h
+rotate_window = WINDOW_SIZE[0] < WINDOW_SIZE[1]
+size = WINDOW_SIZE if not rotate_window else WINDOW_SIZE[::-1]
+if size[0] > size[1]*ASPECT_RATIO:
+    unit = size[1]
+    offset = (size[0] - size[1]*ASPECT_RATIO)/2
+    surf_pos = (0, offset) if rotate_window else (offset, 0)
+else:
+    unit = size[0]/ASPECT_RATIO
+    offset = (size[1] - size[0]/ASPECT_RATIO)/2
+    surf_pos = (offset, 0) if rotate_window else (0, offset)
+window_surface = pygame.display.set_mode(WINDOW_SIZE)
+surface = pygame.Surface((unit*ASPECT_RATIO, unit))
+
+airplane = Airplane([surface.get_width()/2, surface.get_height()/2], [0, 0], unit, unit, unit*3/10)
+joystick = Joystick(pygame.Vector2(unit/5, surface.get_height()-unit/5), int(unit/10), int(unit/50))
 background_color = 100, 130, 200
 
 clock = pygame.time.Clock()
@@ -54,6 +68,12 @@ while True:
         if (event.type == pygame.MOUSEBUTTONDOWN or
                 event.type == pygame.MOUSEBUTTONUP or
                 event.type == pygame.MOUSEMOTION):
+            if rotate_window:
+                event.dict["pos"] = [event.dict["pos"][1]-surf_pos[1],
+                                     window_surface.get_width()-surf_pos[0]-event.dict["pos"][0]]
+            else:
+                event.dict["pos"] = [event.dict["pos"][0]-surf_pos[0],
+                                     event.dict["pos"][1]-surf_pos[1]]
             joystick.update(event)
     surface.fill(background_color)
 
@@ -63,4 +83,6 @@ while True:
     airplane.update_pos(direction, dtime)
     airplane.draw(surface, dtime)
     joystick.draw(surface)
+    surf = surface if not rotate_window else pygame.transform.rotate(surface, -90)
+    window_surface.blit(surf, surf_pos)
     pygame.display.update()

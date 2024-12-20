@@ -85,7 +85,7 @@ class Airplane:
 
 
 class Joystick:
-    def __init__(self, center: pygame.Vector2, radius, small_circle_radius,
+    def __init__(self, center: pygame.Vector2, radius: int, small_circle_radius: int,
                  circle_color=(50, 50, 50, 150), small_circle_color=(0, 0, 0)):
         self.center = center
         self.radius = radius
@@ -123,8 +123,8 @@ class Joystick:
             self.small_circle_center = pygame.Vector2(0, 0)
 
     def get_vector(self) -> pygame.Vector2:
-        vector = pygame.Vector2(self.small_circle_center.x, -self.small_circle_center.y)/self.radius
-        return vector
+        return (pygame.Vector2(self.small_circle_center.x, -self.small_circle_center.y) /
+                (self.radius-self.small_circle_radius))
 
     def draw(self, surface: pygame.Surface):
         alpha_surface = pygame.Surface(surface.get_size(), flags=pygame.SRCALPHA)
